@@ -1,0 +1,69 @@
+﻿@model SCinema.Models.Seance
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Seance</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="FilmId" class="control-label"></label>
+                <select asp-for="FilmId" class="form-control" asp-items="ViewBag.FilmId"></select>
+                <span asp-validation-for="FilmId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SalleId" class="control-label"></label>
+                <select asp-for="SalleId" class="form-control" asp-items="ViewBag.SalleId"></select>
+                <span asp-validation-for="SalleId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FournisseurId" class="control-label"></label>
+                <select asp-for="FournisseurId" class="form-control" asp-items="ViewBag.FournisseurId"></select>
+                <span asp-validation-for="FournisseurId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DateHeureDebut" class="control-label"></label>
+                <input asp-for="DateHeureDebut" class="form-control" />
+                <span asp-validation-for="DateHeureDebut" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DateHeureFin" class="control-label"></label>
+                <input asp-for="DateHeureFin" class="form-control" />
+                <span asp-validation-for="DateHeureFin" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Prix" class="control-label"></label>
+                <input asp-for="Prix" class="form-control" />
+                <span asp-validation-for="Prix" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FormatFilm" class="control-label"></label>
+                <input asp-for="FormatFilm" class="form-control" />
+                <span asp-validation-for="FormatFilm" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Langue" class="control-label"></label>
+                <input asp-for="Langue" class="form-control" />
+                <span asp-validation-for="Langue" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
