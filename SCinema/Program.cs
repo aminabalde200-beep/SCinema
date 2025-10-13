@@ -17,8 +17,8 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
-        options.SignIn.RequireConfirmedAccount = false; // mets false en dev si tu veux
-        // options.Password.RequiredLength = 6; etc. (si tu veux affiner)
+        options.SignIn.RequireConfirmedAccount = false; 
+        // options.Password.RequiredLength = 6; 
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders()
