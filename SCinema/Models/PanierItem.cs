@@ -1,4 +1,6 @@
-﻿namespace SCinema.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SCinema.Models
 {
     public class PanierItem
     {
@@ -13,7 +15,11 @@
         public int? SiegeId { get; set; }
         public Siege? Siege { get; set; }
 
-        public AgeCategorie Categorie { get; set; }
+        // ✅ On veut utiliser CategorieAge dans le code
+        // ✅ On garde le nom de colonne "Categorie" en base pour éviter une migration
+        [Column("Categorie")]
+        public AgeCategorie CategorieAge { get; set; }
+
         public decimal PrixUnitaire { get; set; }
     }
 }

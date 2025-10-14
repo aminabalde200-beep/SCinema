@@ -1,65 +1,83 @@
-﻿@model IEnumerable<SCinema.Models.Film>
-
+﻿@using SCinema.Models
+@model SCinema.Models.Film
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = Model.Title;
+    var seances = ViewBag.Seances as IEnumerable<Seance> ?? Enumerable.Empty<Seance>();
+    var tarifs = ViewBag.Tarifs as Dictionary<int, List<TarifSeance>> ?? new Dictionary<int, List<TarifSeance>>();
 }
 
-<h1>Index</h1>
+<div class="mb-4">
+    <h2>@Model.Title</h2>
+    <p class="text-muted mb-1">@Model.Genre · @Model.DureeMinutes min</p>
+    @if (!string.IsNullOrWhiteSpace(Model.Synopsis))
+    {
+        <p>@Model.Synopsis</p>
+    }
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Synopsis)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Genre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DureeMinutes)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AffichereUrl)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DateSortie)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Synopsis)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Genre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DureeMinutes)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AffichereUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DateSortie)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+@if (!seances.Any())
+{
+    <div class="alert alert-info">Aucune séance à venir pour ce film.</div>
 }
-    </tbody>
-</table>
+else
+{
+    <h4 class="mb-3">Séances à venir</h4>
+
+    @foreach (var s in seances)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <div><strong>Date/heure :</strong> @s.HeureDebut.ToString("g") – @s.HeureFin.ToString("t")</div>
+                <div><strong>Salle :</strong> @s.Salle?.NumeroSalle</div>
+
+                @{
+                    if (tarifs.TryGetValue(s.Id, out var list))
+                    {
+                        <div class="mt-2">
+                            <strong>Tarifs :</strong>
+                            <ul class="mb-2">
+                                @foreach (var t in list.OrderBy(x => x.Categorie.ToString()))
+                                {
+                                    <li>@t.Categorie : @t.Prix.ToString("0.00")</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mt-2 text-muted"><em>Tarifs non publiés.</em></div>
+                    }
+                }
+
+                @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Client"))
+                {
+                    <form asp-controller="Cart" asp-action="Add" method="post" class="mt-2">
+                        <input type="hidden" name="seanceId" value="@s.Id" />
+                        <div class="row g-2 align-items-end">
+                            <div class="col-auto">
+                                <label class="form-label mb-1">Catégorie</label>
+                                <select name="categorie" class="form-select form-select-sm" required>
+                                    <option value="Enfant_3_13">Enfant (3–13)</option>
+                                    <option value="General_14_64">Général (14–64)</option>
+                                    <option value="Aine_65_plus">Aîné (65+)</option>
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-sm btn-primary">Ajouter au panier</button>
+                            </div>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+                    <a class="btn btn-sm btn-outline-primary mt-2"
+                       asp-area="Identity" asp-page="/Account/Login"
+                       asp-route-returnUrl="@returnUrl">
+                        Se connecter pour réserver
+                    </a>
+                }
+            </div>
+        </div>
+    }
+}

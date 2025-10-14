@@ -17,17 +17,65 @@
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+
+
+                    <ul class="navbar-nav flex-grow-1 align-items-center">
+
+    <!-- Accueil -->
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Accueil</a>
+    </li>
+
+    <!-- Billets = Catalogue public -->
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-controller="Catalogue" asp-action="Index">Billets</a>
+    </li>
+
+    <!-- Rechercher (champ dans la barre) => GET /Catalogue/Index?q=... -->
+    <li class="nav-item flex-grow-1">
+        <form class="d-flex ms-sm-3" method="get" asp-controller="Catalogue" asp-action="Index">
+            <input name="q" class="form-control me-2" type="search"
+                   placeholder="Rechercher un film..." value="@Context.Request.Query["q"]" />
+            <button class="btn btn-outline-primary" type="submit">Rechercher</button>
+        </form>
+    </li>
+
+    <!-- Panier (uniquement si connecté) -->
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Cart" asp-action="Index">Mon panier</a>
+        </li>
+    }
+
+    <!-- Compte -->
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index">Compte</a>
+        </li>
+        <li class="nav-item">
+            <form class="d-inline" asp-area="Identity" asp-page="/Account/Logout"
+                  asp-route-returnUrl="@Url.Action("Index","Home", new { area = "" })" method="post">
+                <button class="nav-link btn btn-link text-dark" type="submit">Logout</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Compte</a>
+        </li>
+    }
+</ul>
+
+
                     <partial name="_LoginPartial" />
                 </div>
+
+
             </div>
         </nav>
     </header>

@@ -117,8 +117,9 @@ namespace SCinema.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             b.Entity<PanierItem>()
-                .Property(i => i.Categorie)
-                .HasConversion<string>();
+            .Property(i => i.CategorieAge)   // ← nouveau nom de propriété
+            .HasConversion<string>();
+
 
             // Reservation : n..1 Client
             b.Entity<Reservation>()

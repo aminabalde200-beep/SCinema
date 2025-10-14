@@ -1,0 +1,65 @@
+﻿@model IEnumerable<SCinema.Models.Film>
+@{
+    ViewData["Title"] = "Catalogue";
+    var q = ViewBag.q as string;
+    var selectedGenre = ViewBag.genre as string;
+    var genres = ViewBag.Genres as List<string> ?? new List<string>();
+}
+
+<h2 class="mb-3">Catalogue des films</h2>
+
+<!-- Barre de recherche + filtre genre -->
+<form asp-controller="Catalogue" asp-action="Index" method="get" class="row gy-2 gx-2 align-items-end mb-4">
+    <div class="col-12 col-md-6">
+        <label for="q" class="form-label">Recherche</label>
+        <input type="text" class="form-control" id="q" name="q" value="@q" placeholder="Titre, synopsis..." />
+    </div>
+    <div class="col-12 col-md-4">
+        <label for="genre" class="form-label">Genre</label>
+        <select class="form-select" id="genre" name="genre">
+            <option value="">-- Tous les genres --</option>
+            @foreach (var g in genres)
+            {
+                <option value="@g" selected="@(g == selectedGenre)">
+                    @g
+                </option>
+            }
+        </select>
+    </div>
+    <div class="col-12 col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+    </div>
+</form>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Aucun film trouvé avec ces critères.</div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-3">
+        @foreach (var f in Model)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    @if (!string.IsNullOrWhiteSpace(f.AfficheUrl))
+                    {
+                        <img src="@f.AfficheUrl" class="card-img-top" alt="@f.Title" />
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@f.Title</h5>
+                        <p class="card-text">
+                            <strong>Genre :</strong> @f.Genre<br />
+                            <strong>Durée :</strong> @f.DureeMinutes min<br />
+                            <small class="text-muted">Sortie : @f.DateSortie.ToString()</small>
+                        </p>
+                        <a class="btn btn-primary"
+                           asp-controller="Catalogue" asp-action="Film" asp-route-id="@f.Id">
+                            Voir les séances
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

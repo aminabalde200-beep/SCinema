@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SCinema.Data;
 using SCinema.Models;
+using SCinema.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +29,18 @@ builder.Services
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+builder.Services.AddScoped<ExternalSeeder>();
+
+builder.Services.AddHttpClient();  // pour ExternalSeeder
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<ExternalSeeder>();
+    await seeder.SeedFilmsAsync(); // ne fait rien pour l’instant
+}
+
 
 // ===== Seed rôles =====
 using (var scope = app.Services.CreateScope())

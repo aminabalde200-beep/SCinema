@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +10,7 @@ using SCinema.Models;
 
 namespace SCinema
 {
+    [Authorize(Roles = "Fournisseur")]
     public class TarifSeancesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -22,122 +23,144 @@ namespace SCinema
         // GET: TarifSeances
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.TarifsSeance.Include(t => t.Seance);
-            return View(await applicationDbContext.ToListAsync());
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            var list = await _context.TarifsSeance
+                .Include(t => t.Seance)!.ThenInclude(s => s.Film)
+                .Where(t => t.Seance!.FournisseurId == userId)
+                .OrderByDescending(t => t.Seance!.HeureDebut)
+                .ToListAsync();
+
+            return View(list);
         }
 
         // GET: TarifSeances/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            if (id == null) return NotFound();
 
             var tarifSeance = await _context.TarifsSeance
-                .Include(t => t.Seance)
+                .Include(t => t.Seance)!.ThenInclude(s => s.Film)
+                .Where(t => t.Seance!.FournisseurId == userId)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (tarifSeance == null)
-            {
-                return NotFound();
-            }
 
+            if (tarifSeance == null) return NotFound();
             return View(tarifSeance);
         }
 
         // GET: TarifSeances/Create
         public IActionResult Create()
         {
-            ViewData["SeanceId"] = new SelectList(_context.Seances, "Id", "Id");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            var seances = _context.Seances
+                .Where(s => s.FournisseurId == userId)
+                .Include(s => s.Film)
+                .OrderByDescending(s => s.HeureDebut)
+                .Select(s => new { s.Id, Titre = s.Film!.Title + " - " + s.HeureDebut.ToString("g") })
+                .ToList();
+
+            ViewData["SeanceId"] = new SelectList(seances, "Id", "Titre");
             return View();
         }
 
         // POST: TarifSeances/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,SeanceId,Categorie,Prix")] TarifSeance tarifSeance)
+        public async Task<IActionResult> Create([Bind("SeanceId,Categorie,Prix")] TarifSeance tarifSeance)
         {
-            if (ModelState.IsValid)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            var ok = await _context.Seances.AnyAsync(s => s.Id == tarifSeance.SeanceId && s.FournisseurId == userId);
+            if (!ok) ModelState.AddModelError("SeanceId", "Séance invalide.");
+
+            if (!ModelState.IsValid)
             {
-                _context.Add(tarifSeance);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var seances = _context.Seances
+                    .Where(s => s.FournisseurId == userId)
+                    .Include(s => s.Film)
+                    .Select(s => new { s.Id, Titre = s.Film!.Title + " - " + s.HeureDebut.ToString("g") })
+                    .ToList();
+                ViewData["SeanceId"] = new SelectList(seances, "Id", "Titre", tarifSeance.SeanceId);
+                return View(tarifSeance);
             }
-            ViewData["SeanceId"] = new SelectList(_context.Seances, "Id", "Id", tarifSeance.SeanceId);
-            return View(tarifSeance);
+
+            _context.Add(tarifSeance);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: TarifSeances/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            if (id == null) return NotFound();
 
-            var tarifSeance = await _context.TarifsSeance.FindAsync(id);
-            if (tarifSeance == null)
-            {
-                return NotFound();
-            }
-            ViewData["SeanceId"] = new SelectList(_context.Seances, "Id", "Id", tarifSeance.SeanceId);
+            var tarifSeance = await _context.TarifsSeance
+                .Include(t => t.Seance)
+                .Where(t => t.Seance!.FournisseurId == userId)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (tarifSeance == null) return NotFound();
+
+            var seances = _context.Seances
+                .Where(s => s.FournisseurId == userId)
+                .Include(s => s.Film)
+                .Select(s => new { s.Id, Titre = s.Film!.Title + " - " + s.HeureDebut.ToString("g") })
+                .ToList();
+            ViewData["SeanceId"] = new SelectList(seances, "Id", "Titre", tarifSeance.SeanceId);
+
             return View(tarifSeance);
         }
 
         // POST: TarifSeances/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,SeanceId,Categorie,Prix")] TarifSeance tarifSeance)
         {
-            if (id != tarifSeance.Id)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            if (id != tarifSeance.Id) return NotFound();
+
+            var ok = await _context.Seances.AnyAsync(s => s.Id == tarifSeance.SeanceId && s.FournisseurId == userId);
+            if (!ok) ModelState.AddModelError("SeanceId", "Séance invalide.");
+
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                var seances = _context.Seances
+                    .Where(s => s.FournisseurId == userId)
+                    .Include(s => s.Film)
+                    .Select(s => new { s.Id, Titre = s.Film!.Title + " - " + s.HeureDebut.ToString("g") })
+                    .ToList();
+                ViewData["SeanceId"] = new SelectList(seances, "Id", "Titre", tarifSeance.SeanceId);
+                return View(tarifSeance);
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    _context.Update(tarifSeance);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TarifSeanceExists(tarifSeance.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                _context.Update(tarifSeance);
+                await _context.SaveChangesAsync();
             }
-            ViewData["SeanceId"] = new SelectList(_context.Seances, "Id", "Id", tarifSeance.SeanceId);
-            return View(tarifSeance);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.TarifsSeance.Any(e => e.Id == tarifSeance.Id)) return NotFound();
+                throw;
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: TarifSeances/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            if (id == null) return NotFound();
 
             var tarifSeance = await _context.TarifsSeance
-                .Include(t => t.Seance)
+                .Include(t => t.Seance)!.ThenInclude(s => s.Film)
+                .Where(t => t.Seance!.FournisseurId == userId)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (tarifSeance == null)
-            {
-                return NotFound();
-            }
 
+            if (tarifSeance == null) return NotFound();
             return View(tarifSeance);
         }
 
@@ -146,19 +169,16 @@ namespace SCinema
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var tarifSeance = await _context.TarifsSeance.FindAsync(id);
-            if (tarifSeance != null)
-            {
-                _context.TarifsSeance.Remove(tarifSeance);
-            }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
+            var tarifSeance = await _context.TarifsSeance
+                .Include(t => t.Seance)
+                .Where(t => t.Seance!.FournisseurId == userId)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (tarifSeance != null) _context.TarifsSeance.Remove(tarifSeance);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool TarifSeanceExists(int id)
-        {
-            return _context.TarifsSeance.Any(e => e.Id == id);
         }
     }
 }

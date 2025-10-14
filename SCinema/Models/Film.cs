@@ -10,6 +10,8 @@
         public string AffichereUrl { get; set; } = "";
         public DateOnly DateSortie { get; set; }
 
+        public string AfficheUrl { get; set; } = "";
+
         public ICollection<Seance> Seances { get; set; } = new List<Seance>();
 
     }

@@ -12,8 +12,10 @@
         // Publication 
         public string FournisseurId { get; set; } = "";
         public ApplicationUser? Fournisseur { get; set; }
-        public DateTime DateHeureDebut { get; set; }
-        public DateTime DateHeureFin { get; set; }
+
+        public DateTime DateSeance { get; set; }
+        public DateTime HeureDebut { get; set; }
+        public DateTime HeureFin { get; set; }
         public decimal Prix { get; set; }
      
          public string FormatFilm { get; set; } = ""; // 2D,3D

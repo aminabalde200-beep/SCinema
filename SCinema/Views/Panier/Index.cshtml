@@ -1,0 +1,57 @@
+﻿@model SCinema.Models.Panier
+@{
+    ViewData["Title"] = "Mon panier";
+}
+
+<h2>Mon panier</h2>
+
+@if (Model == null || Model.Items == null || !Model.Items.Any())
+{
+    <div class="alert alert-info">Votre panier est vide.</div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Film</th>
+                <th>Salle</th>
+                <th>Date</th>
+                <th>Catégorie</th>
+                <th class="text-end">Prix</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var i in Model.Items)
+            {
+                <tr>
+                    <td>@i.Seance?.Film?.Title</td>
+                    <td>@i.Seance?.Salle?.NumeroSalle</td>
+                    <td>@i.Seance?.HeureDebut.ToString("g")</td>
+                    <td>@i.CategorieAge</td>
+                    <td class="text-end">@i.PrixUnitaire.ToString("0.00")</td>
+                    <td class="text-end">
+                        <form asp-action="Remove" method="post">
+                            <input type="hidden" name="id" value="@i.Id" />
+                            <button class="btn btn-sm btn-outline-danger">Retirer</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="4" class="text-end">Total</th>
+                <th class="text-end">@Model.Total.ToString("0.00")</th>
+                <th class="text-end">
+                    <form asp-action="Clear" method="post">
+                        <button class="btn btn-sm btn-outline-secondary">Vider</button>
+                    </form>
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+
+    <a class="btn btn-primary" asp-controller="Checkout" asp-action="Index">Passer au paiement</a>
+}

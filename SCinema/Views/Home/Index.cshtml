@@ -1,8 +1,47 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<SCinema.Models.Film>
+@{
+    ViewData["Title"] = "Accueil";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h2 class="mb-3">Nouveautés</h2>
+
+@if (!Model?.Any() ?? true)
+{
+    <div class="alert alert-info">
+        Aucun film pour le moment. <a asp-controller="Catalogue" asp-action="Index">Voir le catalogue</a>.
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-4 g-3">
+        @foreach (var f in Model!)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    @if (!string.IsNullOrWhiteSpace(f.AfficheUrl))
+                    {
+                        <img src="@f.AfficheUrl" class="card-img-top" alt="@f.Title" />
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@f.Title</h5>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                @f.Genre • @f.DureeMinutes min
+                            </small>
+                        </p>
+                        <a class="btn btn-sm btn-primary"
+                           asp-controller="Catalogue" asp-action="Film" asp-route-id="@f.Id">
+                            Voir les séances
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="mt-4">
+        <a class="btn btn-outline-secondary" asp-controller="Catalogue" asp-action="Index">
+            Parcourir tout le catalogue
+        </a>
+    </div>
+}
