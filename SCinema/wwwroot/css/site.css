@@ -20,3 +20,162 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* === Thème sombre CinéRéserv (SCinema) === */
+:root {
+    --bg: #0e0e10;
+    --surface: #151518;
+    --surface-2: #1c1c21;
+    --border: #24242a;
+    --text: #e9e9ee;
+    --muted: #b8b8c2;
+    --primary: #d33a34; /* rouge cinéma */
+    --accent: #ffc107; /* jaune accent (étoile/badge/bouton) */
+}
+
+html, body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* Navbar sombre compacte */
+.navbar {
+    background: var(--surface) !important;
+    border-bottom: 1px solid var(--border) !important;
+}
+
+    .navbar .navbar-brand {
+        color: var(--primary) !important;
+        font-weight: 700;
+    }
+
+    .navbar .nav-link {
+        color: var(--text) !important;
+        opacity: .9;
+    }
+
+        .navbar .nav-link:hover {
+            opacity: 1;
+        }
+
+/* Bouton connexion (jaune, pilule) */
+.btn.btn-warning.rounded-pill {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #1a1a1a;
+    font-weight: 600;
+    padding: .45rem .9rem;
+}
+
+/* Boutons primaires (rouge) et contours */
+.btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+    .btn-primary:hover {
+        filter: brightness(1.05);
+    }
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+    .btn-outline-primary:hover {
+        background: var(--primary);
+        color: #fff;
+    }
+
+/* Hero (bandeau d'accueil) */
+.hero-dark {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+    .hero-dark .hero-title {
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 800;
+        color: var(--primary);
+    }
+
+    .hero-dark .hero-sub {
+        color: var(--muted);
+        font-size: 1.05rem;
+    }
+
+/* Titre section */
+.section-title {
+    font-weight: 800;
+    margin: 1rem 0 1rem;
+}
+
+/* Cartes film */
+.movie-card.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+    .movie-card.card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    }
+
+.movie-card .card-title {
+    color: var(--text);
+    font-weight: 700;
+}
+
+.movie-card .card-text {
+    color: var(--muted);
+}
+
+.movie-card .card-img-top {
+    background: #000;
+    object-fit: cover;
+    max-height: 360px; /* garde les posters cadrés */
+}
+
+/* Badges (ex. âge / “Nouveau”) */
+.badge-accent {
+    background: var(--accent);
+    color: #1a1a1a;
+    font-weight: 700;
+}
+
+/* Inputs / selects sur fond sombre */
+.form-control, .form-select, .input-group-text {
+    background: var(--surface-2);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+    .form-control::placeholder {
+        color: #9da0a8;
+    }
+
+/* Footer */
+footer.footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+}
+
+/* Décaler le contenu sous une navbar fixée */
+body {
+    padding-top: 72px; /* ~ hauteur de la navbar (ajuste si besoin) */
+}
+
+/* Optionnel: un peu moins sur petits écrans */
+@media (max-width: 576px) {
+    body {
+        padding-top: 64px;
+    }
+}

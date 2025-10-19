@@ -59,7 +59,7 @@ namespace SCinema.Areas.Identity.Pages.Account.Manage
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Phone = user.Phone,
+                
                 PhoneNumber = phoneNumberIdentity
             };
         }
@@ -89,7 +89,7 @@ namespace SCinema.Areas.Identity.Pages.Account.Manage
             // Mettre à jour les champs personnalisés
             user.FirstName = Input.FirstName;
             user.LastName = Input.LastName;
-            user.Phone = Input.Phone;
+            
 
             await _userManager.UpdateAsync(user);
 

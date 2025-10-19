@@ -2,19 +2,19 @@
 @model RegisterModel
 @using SCinema.Models
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Inscription";
 }
 
 <h1>@ViewData["Title"]</h1>
 
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-5">
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
+            <h2>Créer un nouveau compte</h2>
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
-            <!-- ====== Profil (ajouts) ====== -->
+            <!-- ====== Profil ====== -->
             <div class="form-floating mb-3">
                 <input asp-for="Input.FirstName" class="form-control" />
                 <label asp-for="Input.FirstName"></label>
@@ -27,11 +27,7 @@
                 <span asp-validation-for="Input.LastName" class="text-danger"></span>
             </div>
 
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Phone" class="form-control" />
-                <label asp-for="Input.Phone"></label>
-                <span asp-validation-for="Input.Phone" class="text-danger"></span>
-            </div>
+            
 
             <div class="form-floating mb-3">
                 <select asp-for="Input.SelectedRole" class="form-select">
@@ -45,7 +41,7 @@
                 <span asp-validation-for="Input.SelectedRole" class="text-danger"></span>
             </div>
             <!-- ====== /Profil ====== -->
-            <!-- ====== Identifiants (existant) ====== -->
+            <!-- ====== Identifiants ====== -->
             <div class="form-floating mb-3">
                 <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                 <label asp-for="Input.Email">Email</label>
@@ -54,45 +50,43 @@
 
             <div class="form-floating mb-3">
                 <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.Password">Password</label>
+                <label asp-for="Input.Password">Mot de passe</label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
 
             <div class="form-floating mb-3">
                 <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
+                <label asp-for="Input.ConfirmPassword">Confirmer le mot de passe</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
             <!-- ====== /Identifiants ====== -->
 
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">S’inscrire</button>
         </form>
     </div>
 
-    <div class="col-md-6 col-md-offset-2">
+    <div class="col-md-6 offset-md-1">
         <section>
-            <h3>Use another service to register.</h3>
+            <h3>Se connecter via un service externe</h3>
             <hr />
             @{
                 if ((Model.ExternalLogins?.Count ?? 0) == 0)
                 {
-                    <div>
-                        <p>There are no external authentication services configured.</p>
+                    <div class="text-muted">
+                        Aucun service d’authentification externe configuré.
                     </div>
                 }
                 else
                 {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name"
-                                            title="Log in using your @provider.DisplayName account">
-                                        @provider.DisplayName
-                                    </button>
-                                }
-                            </p>
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var provider in Model.ExternalLogins!)
+                            {
+                                <button type="submit" class="btn btn-outline-primary" name="provider" value="@provider.Name"
+                                        title="Se connecter via @provider.DisplayName">
+                                    @provider.DisplayName
+                                </button>
+                            }
                         </div>
                     </form>
                 }

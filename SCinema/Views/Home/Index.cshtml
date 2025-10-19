@@ -3,45 +3,40 @@
     ViewData["Title"] = "Accueil";
 }
 
-<h2 class="mb-3">Nouveautés</h2>
-
-@if (!Model?.Any() ?? true)
-{
-    <div class="alert alert-info">
-        Aucun film pour le moment. <a asp-controller="Catalogue" asp-action="Index">Voir le catalogue</a>.
+<!-- Bandeau héro sombre -->
+<div class="hero-dark">
+    <div class="mb-3">
+        <i class="bi bi-film" style="font-size:48px; color:var(--accent);"></i>
     </div>
-}
-else
-{
-    <div class="row row-cols-1 row-cols-md-4 g-3">
-        @foreach (var f in Model!)
-        {
-            <div class="col">
-                <div class="card h-100">
-                    @if (!string.IsNullOrWhiteSpace(f.AfficheUrl))
-                    {
-                        <img src="@f.AfficheUrl" class="card-img-top" alt="@f.Title" />
-                    }
-                    <div class="card-body">
-                        <h5 class="card-title">@f.Title</h5>
-                        <p class="card-text">
-                            <small class="text-muted">
-                                @f.Genre • @f.DureeMinutes min
-                            </small>
-                        </p>
-                        <a class="btn btn-sm btn-primary"
-                           asp-controller="Catalogue" asp-action="Film" asp-route-id="@f.Id">
-                            Voir les séances
-                        </a>
-                    </div>
+    <div class="hero-title">Réservez vos billets</div>
+    <p class="hero-sub">
+        Découvrez les derniers films à l'affiche et réservez vos places en quelques clics.
+    </p>
+</div>
+
+<h2 class="section-title">Films à l'affiche</h2>
+
+<div class="row row-cols-1 row-cols-md-3 g-3">
+    @foreach (var f in Model)
+    {
+        <div class="col">
+            <div class="movie-card card h-100">
+                @if (!string.IsNullOrWhiteSpace(f.AfficheUrl))
+                {
+                    <img src="@f.AfficheUrl" class="card-img-top" alt="@f.Title" />
+                }
+                <div class="card-body">
+                    <h5 class="card-title">@f.Title</h5>
+                    <p class="card-text">
+                        <small class="text-muted">@f.Genre • @f.DureeMinutes min</small><br />
+                        <small class="text-muted">Sortie : @f.DateSortie.ToString()</small>
+                    </p>
+                    <a class="btn btn-primary"
+                       asp-controller="Catalogue" asp-action="Film" asp-route-id="@f.Id">
+                        Réserver
+                    </a>
                 </div>
             </div>
-        }
-    </div>
-
-    <div class="mt-4">
-        <a class="btn btn-outline-secondary" asp-controller="Catalogue" asp-action="Index">
-            Parcourir tout le catalogue
-        </a>
-    </div>
-}
+        </div>
+    }
+</div>

@@ -1,85 +1,154 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using SCinema.Models
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+
+
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - SCinema</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SCinema.styles.css" asp-append-version="true" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <!-- fixed-top pour coller la navbar en haut -->
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark border-bottom box-shadow fixed-top">
             <div class="container-fluid">
+                <!-- Logo / marque à gauche -->
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SCinema</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                        aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <!-- Tout le menu poussé à droite grâce à ms-auto -->
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav ms-auto align-items-center">
+
+                        <!-- FILMS -->
+                        <li class="nav-item me-3">
+                            <a class="nav-link d-flex align-items-center"
+                               asp-controller="Catalogue" asp-action="Index">
+                                <i class="bi bi-film me-1"></i> Films
+                            </a>
+                        </li>
+
+                        <!-- MES RÉSERVATIONS (page client) -->
+                        <li class="nav-item me-3">
+                            <a class="nav-link d-flex align-items-center"
+                               asp-controller="Reservations" asp-action="Index">
+                                <i class="bi bi-ticket-perforated me-1"></i> Mes réservations
+                            </a>
+                        </li>
+
+                        <!-- RECHERCHER (renvoie vers Catalogue qui contient la recherche/filtre) -->
+                        <li class="nav-item me-3">
+                            <a class="nav-link d-flex align-items-center"
+                               asp-controller="Catalogue" asp-action="Index">
+                                <i class="bi bi-search me-1"></i> Rechercher
+                            </a>
+                        </li>
+
+                        @* Panier — visible UNIQUEMENT pour un utilisateur connecté qui a le rôle Client *@
+                        @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Client"))
+                        {
+                            <li class="nav-item me-3">
+                                <a class="nav-link d-flex align-items-center"
+                                   asp-controller="Panier" asp-action="Index">
+                                    <i class="bi bi-bag me-1"></i> Panier
+                                </a>
+                            </li>
+                        }
+
+                        @* Liens de gestion — visibles UNIQUEMENT pour un Fournisseur connecté *@
+                        @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Fournisseur"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Films" asp-action="Index">Gérer les films</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Salles" asp-action="Index">Gérer les salles</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Seances" asp-action="Index">Gérer les séances</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="TarifSeances" asp-action="Index">Gérer les tarifs</a>
+                            </li>
+                        }
+
+                        <!-- CONNEXION / COMPTE -->
+                        @* --- CONNEXION / COMPTE --- *@
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            // construit un nom lisible: Prénom Nom si dispo, sinon la partie avant @ de l’email
+                            var me = await UserManager.GetUserAsync(User);
+                            string displayName;
+                            if (!string.IsNullOrWhiteSpace(me?.FirstName) || !string.IsNullOrWhiteSpace(me?.LastName))
+                            {
+                                displayName = $"{me?.FirstName} {me?.LastName}".Trim();
+                            }
+                            else
+                            {
+                                var raw = User.Identity?.Name ?? "Compte";
+                                displayName = raw?.Split('@')[0] ?? "Compte";
+                            }
+
+                            // Panier visible uniquement pour les clients
+                            if (User.IsInRole("Client"))
+                            {
+                                <li class="nav-item me-3">
+                                    <a class="nav-link d-flex align-items-center" asp-controller="Panier" asp-action="Index">
+                                        <i class="bi bi-bag me-1"></i> Panier
+                                    </a>
+                                </li>
+                            }
+
+                            <li class="nav-item me-2">
+                                <a class="nav-link d-flex align-items-center"
+                                   asp-area="Identity" asp-page="/Account/Manage/Index" title="Gérer mon profil">
+                                    <i class="bi bi-person-circle me-1"></i> @displayName
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <form class="d-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                      asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                                    <button class="btn btn-link nav-link text-decoration-none px-2" type="submit">
+                                        <i class="bi bi-box-arrow-right me-1"></i> Déconnexion
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="btn btn-warning rounded-pill d-flex align-items-center"
+                                   asp-area="Identity" asp-page="/Account/Login">
+                                    <i class="bi bi-person me-2"></i> Connexion
+                                </a>
+                            </li>
+                        }
 
 
-                    <ul class="navbar-nav flex-grow-1 align-items-center">
-
-    <!-- Accueil -->
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Accueil</a>
-    </li>
-
-    <!-- Billets = Catalogue public -->
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-controller="Catalogue" asp-action="Index">Billets</a>
-    </li>
-
-    <!-- Rechercher (champ dans la barre) => GET /Catalogue/Index?q=... -->
-    <li class="nav-item flex-grow-1">
-        <form class="d-flex ms-sm-3" method="get" asp-controller="Catalogue" asp-action="Index">
-            <input name="q" class="form-control me-2" type="search"
-                   placeholder="Rechercher un film..." value="@Context.Request.Query["q"]" />
-            <button class="btn btn-outline-primary" type="submit">Rechercher</button>
-        </form>
-    </li>
-
-    <!-- Panier (uniquement si connecté) -->
-    @if (User.Identity?.IsAuthenticated == true)
-    {
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-controller="Cart" asp-action="Index">Mon panier</a>
-        </li>
-    }
-
-    <!-- Compte -->
-    @if (User.Identity?.IsAuthenticated == true)
-    {
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index">Compte</a>
-        </li>
-        <li class="nav-item">
-            <form class="d-inline" asp-area="Identity" asp-page="/Account/Logout"
-                  asp-route-returnUrl="@Url.Action("Index","Home", new { area = "" })" method="post">
-                <button class="nav-link btn btn-link text-dark" type="submit">Logout</button>
-            </form>
-        </li>
-    }
-    else
-    {
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Compte</a>
-        </li>
-    }
-</ul>
 
 
-                    <partial name="_LoginPartial" />
+                    </ul>
                 </div>
-
-
             </div>
         </nav>
     </header>
-    <div class="container">
+
+    <!-- padding-top pour ne pas que le contenu passe sous la navbar fixed -->
+    <div class="container" style="padding-top: 72px;">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
@@ -87,9 +156,10 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - SCinema - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - SCinema
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

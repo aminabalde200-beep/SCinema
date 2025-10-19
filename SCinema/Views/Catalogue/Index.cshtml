@@ -14,24 +14,33 @@
         <label for="q" class="form-label">Recherche</label>
         <input type="text" class="form-control" id="q" name="q" value="@q" placeholder="Titre, synopsis..." />
     </div>
+
     <div class="col-12 col-md-4">
         <label for="genre" class="form-label">Genre</label>
         <select class="form-select" id="genre" name="genre">
             <option value="">-- Tous les genres --</option>
             @foreach (var g in genres)
             {
-                <option value="@g" selected="@(g == selectedGenre)">
-                    @g
-                </option>
+                if (g == selectedGenre)
+                {
+                    <option value="@g" selected>@g</option>
+                }
+                else
+                {
+                    <option value="@g">@g</option>
+                }
             }
         </select>
+
+
     </div>
+
     <div class="col-12 col-md-2">
         <button type="submit" class="btn btn-primary w-100">Filtrer</button>
     </div>
 </form>
 
-@if (!Model.Any())
+@if (!(Model?.Any() ?? false))
 {
     <div class="alert alert-info">Aucun film trouvé avec ces critères.</div>
 }
@@ -41,10 +50,11 @@ else
         @foreach (var f in Model)
         {
             <div class="col">
-                <div class="card h-100">
+                <div class="movie-card card h-100">
+
                     @if (!string.IsNullOrWhiteSpace(f.AfficheUrl))
                     {
-                        <img src="@f.AfficheUrl" class="card-img-top" alt="@f.Title" />
+                        <img src="@f.AfficheUrl" class="card-img-top" alt="Affiche de @f.Title" />
                     }
                     <div class="card-body">
                         <h5 class="card-title">@f.Title</h5>

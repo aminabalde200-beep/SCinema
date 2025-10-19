@@ -9,9 +9,9 @@ namespace SCinema.Models
         public string LastName { get; set; } = "";
 
      
-        public string? Phone { get; set; }
+       
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreateAt { get; set; } = DateTime.UtcNow;
         public bool IsActive { get; set; } = true;
     }
 }

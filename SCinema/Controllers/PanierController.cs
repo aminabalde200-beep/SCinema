@@ -10,10 +10,10 @@ using SCinema.Models;
 namespace SCinema
 {
     [Authorize(Roles = "Client")]
-    public class CartController : Controller
+    public class PanierController : Controller
     {
         private readonly ApplicationDbContext _ctx;
-        public CartController(ApplicationDbContext ctx) => _ctx = ctx;
+        public PanierController(ApplicationDbContext ctx) => _ctx = ctx;
 
         // Récupère ou crée le panier du client courant
         private async Task<Panier> GetOrCreateCartAsync(string userId)

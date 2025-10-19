@@ -52,29 +52,24 @@ namespace SCinema.Areas.Identity.Pages.Account
         public InputModel Input { get; set; }
 
         public string ReturnUrl { get; set; }
-
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
-        // Liste des rôles affichés dans le <select>
+        // Rôles proposés dans le <select>
         public IList<string> AvailableRoles { get; set; } = new List<string>();
 
         public class InputModel
         {
-            // === Champs profil ===
+            // ==== Profil (sans téléphone) ====
             [Required, Display(Name = "Prénom")]
             public string FirstName { get; set; }
 
             [Required, Display(Name = "Nom")]
             public string LastName { get; set; }
 
-            [Display(Name = "Téléphone")]
-            public string Phone { get; set; }
-
-            // === Rôle choisi ===
             [Required(ErrorMessage = "Choisis un rôle"), Display(Name = "Rôle")]
             public string SelectedRole { get; set; }
 
-            // === Identifiants ===
+            // ==== Identifiants ====
             [Required, EmailAddress, Display(Name = "Email")]
             public string Email { get; set; }
 
@@ -94,7 +89,6 @@ namespace SCinema.Areas.Identity.Pages.Account
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            // Charger la liste des rôles (doivent être seedés au démarrage)
             AvailableRoles = _roleManager.Roles.Select(r => r.Name).ToList();
         }
 
@@ -102,18 +96,16 @@ namespace SCinema.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            // Recharger la liste des rôles en cas d'erreur de validation
             AvailableRoles = _roleManager.Roles.Select(r => r.Name).ToList();
 
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
 
-                // Mapper tes champs personnalisés
+                // Renseigner les champs personnalisés (sans téléphone)
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
-                user.Phone = Input.Phone;      // champ perso (distinct de PhoneNumber d'Identity)
-                user.CreatedAt = DateTime.UtcNow;
+                user.CreateAt = DateTime.UtcNow; // correspond à ta propriété dans ApplicationUser
                 user.IsActive = true;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
@@ -125,7 +117,7 @@ namespace SCinema.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    // Sécuriser le rôle choisi puis l'assigner
+                    // Validation + assignation du rôle choisi
                     if (string.IsNullOrWhiteSpace(Input.SelectedRole) ||
                         !await _roleManager.RoleExistsAsync(Input.SelectedRole))
                     {
@@ -134,7 +126,7 @@ namespace SCinema.Areas.Identity.Pages.Account
                     }
                     await _userManager.AddToRoleAsync(user, Input.SelectedRole);
 
-                    // Confirmation email (code Identity par défaut)
+                    // Confirmation email (par défaut)
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -164,7 +156,7 @@ namespace SCinema.Areas.Identity.Pages.Account
                 }
             }
 
-            // If we got this far, something failed, redisplay form
+            // Si on arrive ici, on réaffiche le formulaire
             return Page();
         }
 
